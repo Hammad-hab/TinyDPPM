@@ -39,7 +39,10 @@ class VersionManager:
         def safe(*args, **kwargs):
             try:
                 return clbck(*args, **kwargs)
-            except (KeyboardInterrupt, Exception):
+            except KeyboardInterrupt:
+                self._try_failed_save()
+                raise
+            except Exception:
                 self._try_failed_save()
                 raise
     
