@@ -11,6 +11,13 @@ class DiffusionImage:
             contents = (transforms.ToTensor())(contents)
         self._raw = contents
 
+    def getRaw(self):
+        return self._raw
+
+    def applyTransform(self, transforms):
+        self._raw = transforms(self._raw)
+        return self
+
     def __add__(self, other):
         return self._raw + other
 

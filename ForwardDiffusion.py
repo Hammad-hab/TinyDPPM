@@ -29,6 +29,11 @@ if __name__ == "__main__":
     next(cfitr)
     img, label = next(cfitr)
     img = img[0]
-    img, _ = fd.getNoisyImage(img, 100)
-    img.view()
+    fig, axes = plt.subplots(1, 9, figsize=(18, 2))
+    
+    for i in range(1, 10):
+        img, _ = fd.getNoisyImage(img, i)
+        axes[i - 1].imshow(img._raw.permute(1, 2, 0))
+        axes[i - 1].axis("off")
+
     plt.show()
