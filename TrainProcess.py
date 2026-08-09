@@ -31,17 +31,17 @@ class TrainProcess:
             x0 = x_batch.to(torch.float32)
             t = torch.randint(0, self.ns.T, (x0.shape[0],))
             x_t, eps = self.fd.getNoisyTensor(x0, t)
-            mbgd_loss = step_fn(x_t, eps)
+            mbgd_loss = step_fn(x_t, eps, t)
             avg_loss.append(mbgd_loss)
             mbgd_epoch+=1
         
         return np.mean(avg_loss)
 
     def _init_train_fn(self,):
-        def step(x_t, eps):
+        def step(x_t, eps, t):
             self.model.train()
             
-            pred = self.model(x_t)
+            pred = self.model(x_t, t)
             loss = self.loss_criterion(pred, eps)
             loss.backward()
             

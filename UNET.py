@@ -43,7 +43,7 @@ class UNET(nn.Module):
             nn.ConvTranspose2d(32, 3, 3, padding=1),
         )
         
-    def forward(self, x):
+    def forward(self, x, t):
         # x is [3, 32, 32], standard CIFAR resolution
         x1 = self.enc1(x) # [32, 16, 16]
         x2 = self.enc2(x1)  # [64, 8, 8]
