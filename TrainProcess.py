@@ -1,0 +1,65 @@
+from torch import nn
+import torch
+import numpy as np
+from ForwardDiffusion import ForwardDiffusion
+from NoiseScheduler import NoiseScheduler
+from UNET import UNET
+from VersionManager import VersionManager
+
+class TrainProcess:
+    def __init__(self, ns: NoiseScheduler, fd: ForwardDiffusion, unet:UNET, ds, vm: VersionManager, epochs: int) -> None:
+        self.ns = ns
+        self.ds = ds
+        self.fd = fd
+        self.vm = vm
+        self.epoch = epochs
+        self.current_epoch = 0
+        self.model = unet
+        self._loss = []
+        self._valloss = []
+        
+        self.optim = torch.optim.AdamW(self.model.parameters())
+        self.loss_criterion = nn.MSELoss()
+        
+        self._train_step = self._init_train_fn()
+
+    def _init_mbgd(self, step_fn, loader):
+        avg_loss = []
+        mbgd_epoch = 1
+        for x_batch, _ in loader:
+            print(f"[LOG] Running MGBD Epoch {mbgd_epoch}")
+            x0 = x_batch.to(torch.float32)
+            t = torch.randint(0, self.ns.T, (x0.shape[0],))
+            x_t, eps = self.fd.getNoisyTensor(x0, t)
+            mbgd_loss = step_fn(x_t, eps)
+            avg_loss.append(mbgd_loss)
+            mbgd_epoch+=1
+        
+        return np.mean(avg_loss)
+
+    def _init_train_fn(self,):
+        def step(x_t, eps):
+            self.model.train()
+            
+            pred = self.model(x_t)
+            loss = self.loss_criterion(pred, eps)
+            loss.backward()
+            
+            self.optim.step()
+            self.optim.zero_grad()
+
+            return loss.item()
+        return step
+
+    def train(self):
+        for _ in range(self.epoch):
+            self.current_epoch += 1
+            print(f"[LOG] Current epoch {self.current_epoch}")
+            loss = self._init_mbgd(self._train_step, self.ds.train_loader)
+            self._loss.append(loss)
+            self.vm.setEpoch(self.current_epoch)
+            self.vm.save()
+            print(f'[LOG] loss: {loss}, epoch {self.current_epoch}')
+
+    def getModel(self):
+        return self.model

@@ -1,7 +1,7 @@
 from typing import Union
 
 import torch, math
-from Data import CIFAR
+from Datasets import CIFAR
 import matplotlib.pyplot as plt
 from torchvision import transforms
 from Image import DiffusionImage
@@ -17,8 +17,9 @@ class ForwardDiffusion:
         return DiffusionImage(t[0]), t[1]
 
     def getNoisyTensor(self, x0, t):
-        eps = torch.randn_like(x0)                          
-        xt = torch.sqrt(self.ns._alphab[t]) * x0 + torch.sqrt(1-self.ns._alphab[t])*eps
+        eps = torch.randn_like(x0)     
+        alpha = self.ns._alphab[t].view(-1, 1, 1, 1)        
+        xt = torch.sqrt(alpha) * x0 + torch.sqrt(1-alpha)*eps
         return xt, eps
 
 if __name__ == "__main__":

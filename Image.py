@@ -1,7 +1,7 @@
 from PIL.Image import Image
 import torch, math
 from typing import Union
-from Data import CIFAR
+from Datasets import CIFAR
 import matplotlib.pyplot as plt
 from torchvision import transforms
 

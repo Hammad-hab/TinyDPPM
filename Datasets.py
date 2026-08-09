@@ -25,10 +25,14 @@ class MNIST:
 class CIFAR:
     FOLDER='./data/cifar10'
     
-    def __init__(self, transform, batch_size=4) -> None:
+    def __init__(self, transform=None, batch_size=4) -> None:
        self._train_set = None
        self._test_set = None
-       self._transform = transform
+       if transform:
+           self._transform = transform
+       else:
+           self._transform = torchvision.transforms.ToTensor()
+           
        self.load_data()      
        self.test_loader = self._create_loader(self._test_set, batch_size)
        self.train_loader = self._create_loader(self._train_set, batch_size)
