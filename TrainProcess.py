@@ -5,6 +5,7 @@ from ForwardDiffusion import ForwardDiffusion
 from NoiseScheduler import NoiseScheduler
 from UNET import UNET
 from VersionManager import VersionManager
+from util import _colorize_loss
 
 class TrainProcess:
     def __init__(self, ns: NoiseScheduler, fd: ForwardDiffusion, unet:UNET, ds, vm: VersionManager, epochs: int) -> None:
@@ -17,8 +18,9 @@ class TrainProcess:
         self.model = unet
         self._loss = []
         self._valloss = []
+        self._prev_loss = None
         
-        self.optim = torch.optim.AdamW(self.model.parameters())
+        self.optim = torch.optim.AdamW(self.model.parameters(), lr=1e-4)
         self.loss_criterion = nn.MSELoss()
         
         self._train_step = self._init_train_fn()
@@ -27,14 +29,15 @@ class TrainProcess:
         avg_loss = []
         mbgd_epoch = 1
         for x_batch, _ in loader:
-            print(f"[LOG] Running MGBD Epoch {mbgd_epoch}")
             x0 = x_batch.to(torch.float32)
             t = torch.randint(0, self.ns.T, (x0.shape[0],))
             x_t, eps = self.fd.getNoisyTensor(x0, t)
             mbgd_loss = step_fn(x_t, eps, t)
+            print(f"[LOG] Running MGBD Epoch {mbgd_epoch} with loss {_colorize_loss(self._prev_loss, mbgd_loss)}")
+            self._prev_loss = mbgd_loss
             avg_loss.append(mbgd_loss)
-            mbgd_epoch+=1
-        
+            mbgd_epoch += 1
+    
         return np.mean(avg_loss)
 
     def _init_train_fn(self,):

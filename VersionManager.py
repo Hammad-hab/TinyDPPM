@@ -35,6 +35,7 @@ class VersionManager:
                         continue
             if not epochs:
                 if silent:
+                    print('[WARNING]: This is the first time the model is being trained, no previous saves exist')
                     return None
                 raise FileNotFoundError(f'No saved models found under the name {self.name}')
             latest = max(epochs)

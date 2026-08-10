@@ -9,7 +9,7 @@ EPOCHS, TIME = 1000, 1000
 
 ns = NoiseScheduler(TIME, 'cosine')
 fd = ForwardDiffusion(ns)
-ds = CIFAR()
+ds = CIFAR(batch_size=32)
 model = UNET()
 vm = VersionManager(model, 'tinydppm')
 vm.load_latest(True, True)
