@@ -22,6 +22,15 @@ class ForwardDiffusion:
         xt = torch.sqrt(alpha) * x0 + torch.sqrt(1-alpha)*eps
         return xt, eps
 
+    def reverse(self, x, noise, t) -> torch.Tensor:
+        a0 = ((1-self.ns._alphas[t])/(torch.sqrt(1-self.ns._alphab[t])))*noise
+        a1 = (1/torch.sqrt(self.ns._alphas[t]))*(x-a0)
+        z = torch.randn_like(x)
+        if t > 0:
+                z = torch.randn_like(x)
+                return a1 + torch.sqrt(self.ns._betas[t]) * z
+        return a1
+        
 if __name__ == "__main__":
     ns = NoiseScheduler(1000, 'cosine')
     fd = ForwardDiffusion(ns)

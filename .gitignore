@@ -3,3 +3,4 @@ data/
 data/*
 versions/*
 versions/
+.DS_Store

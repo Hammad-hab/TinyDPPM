@@ -1,3 +1,4 @@
+from Image import DiffusionImage
 from TrainProcess import TrainProcess
 from NoiseScheduler import NoiseScheduler
 from ForwardDiffusion import ForwardDiffusion
@@ -7,7 +8,8 @@ from VersionManager import VersionManager
 import torch
 
 model = UNET()
-fd = ForwardDiffusion()
+ns = NoiseScheduler(1000, "cosine")
+fd = ForwardDiffusion(ns)
 vm = VersionManager(model)
 vm.load_latest(True, True)
 
@@ -24,5 +26,7 @@ with torch.no_grad():
     for t in reversed(range(1000)):
         tensor_t = torch.tensor([t])
         noise = model(x, tensor_t)
-        x = fd.reverse(x, noise)
-        
+        x = fd.reverse(x, noise, t)
+
+img = (DiffusionImage(x[0]).getAsPIL())
+img.save("output.png")
