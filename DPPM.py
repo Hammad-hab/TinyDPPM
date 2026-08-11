@@ -14,7 +14,7 @@ model = UNET()
 vm = VersionManager(model, 'tinydppm')
 vm.load_latest(True, True)
 procs = TrainProcess(ns, fd, model, ds, vm, EPOCHS)
-
+procs.current_epoch = vm.startepoch
 @vm.save_on_fail
 def main():
     procs.train()

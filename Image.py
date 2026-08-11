@@ -10,10 +10,14 @@ class DiffusionImage:
         if isinstance(contents, Image):
             contents = (transforms.ToTensor())(contents)
         self._raw = contents
+        self._to_pil = transforms.ToPILImage()
 
     def getRaw(self):
         return self._raw
-
+        
+    def getAsPIL(self):
+        return self._to_pil(self._raw)
+        
     def applyTransform(self, transforms):
         self._raw = transforms(self._raw)
         return self

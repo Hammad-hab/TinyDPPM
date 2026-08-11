@@ -5,6 +5,7 @@ class VersionManager:
     def __init__(self, model, name="model") -> None:
         self.dir = "versions/"
         self.name = name
+        self.startepoch=0
         self._epoch = 0
         if not os.path.isdir(self.dir):
             os.mkdir(self.dir)
@@ -19,10 +20,10 @@ class VersionManager:
             return
             
         path = f"{self.dir}/{self.name}-{self._epoch}.pth"
-        if not os.path.isfile(path):
-            torch.save(self._model.state_dict(), path)
-        else:
-            raise FileExistsError(f'Program refused to override already exisitng model file {self.name}-{self._epoch}')
+        # if not os.path.isfile(path):
+        torch.save(self._model.state_dict(), path)
+        # else:
+        #     raise FileExistsError(f'Program refused to override already exisitng model file {self.name}-{self._epoch}')
 
     def load_latest(self, inplace=False, silent=False):
             prefix = f"{self.name}-"
@@ -40,6 +41,8 @@ class VersionManager:
                 raise FileNotFoundError(f'No saved models found under the name {self.name}')
             latest = max(epochs)
             self._epoch = latest
+            self.startepoch = self._epoch
+            print(f'Found latest epoch {self._epoch}')
             return self.load_epoch(latest, inplace=inplace)
         
     def load_epoch(self, epoch, inplace=False):
