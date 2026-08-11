@@ -1,5 +1,7 @@
 # TinyDPPM
 
+<img src="assets/output.png"/>
+
 A small, from-scratch implementation of a **Denoising Diffusion Probabilistic Model (DDPM)** in PyTorch.
 
 TinyDPPM isn't trying to be fast or state-of-the-art — it's built for learning and experimentation. Every core piece of a diffusion model is implemented by hand: the noise scheduler, the forward (noising) process, a small U-Net, the training loop, and the reverse (sampling) process.

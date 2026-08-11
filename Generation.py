@@ -10,14 +10,14 @@ import torch
 model = UNET()
 ns = NoiseScheduler(1000, "cosine")
 fd = ForwardDiffusion(ns)
-vm = VersionManager(model)
+vm = VersionManager(model, 'tinydppm')
 vm.load_latest(True, True)
 
 x = torch.randn(
-    1,       # number of images
-    3,       # CIFAR channels
-    32,      # height
-    32       # width
+    1,       
+    3,      
+    32,  
+    32   
 )
 
 model.eval()
