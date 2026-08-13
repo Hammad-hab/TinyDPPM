@@ -24,7 +24,9 @@ class ForwardDiffusion:
 
     def reverse(self, x, noise, t) -> torch.Tensor:
         a0 = ((1-self.ns._alphas[t])/(torch.sqrt(1-self.ns._alphab[t])))*noise
+        # print(self.ns._alphas[t])
         a1 = (1/torch.sqrt(self.ns._alphas[t]))*(x-a0)
+        print(torch.sqrt(self.ns._alphas[t]))
         z = torch.randn_like(x)
         if t > 0:
                 z = torch.randn_like(x)

@@ -10,7 +10,7 @@ class NoiseScheduler:
         if mode == "linear":
             self._betas: torch.Tensor = torch.linspace(NoiseScheduler.BetaStart, NoiseScheduler.BetaEnd, self.T)
             self._alphas = 1.0 - self._betas
-            self._alphab = torch.cumprod(self._alphas)
+            self._alphab = torch.cumprod(self._alphas, dim=0)
 
         elif mode == 'cosine':
             self._tms: torch.Tensor = torch.linspace(0, self.T, self.T+1)

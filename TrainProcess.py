@@ -47,7 +47,16 @@ class TrainProcess:
             pred = self.model(x_t, t)
             loss = self.loss_criterion(pred, eps)
             loss.backward()
+
             
+            total_norm = torch.nn.utils.clip_grad_norm_(
+                self.model.parameters(),
+                float("inf")
+            )
+            
+            print("gradient norm:", total_norm.item())
+            
+
             self.optim.step()
             self.optim.zero_grad()
 
