@@ -16,7 +16,13 @@ class DiffusionImage:
         return self._raw
         
     def getAsPIL(self):
-        return self._to_pil(self._raw)
+        x = self._raw
+    
+        # if model output is in [-1, 1]
+        x = (x + 1) / 2
+        x = x.clamp(0, 1)
+    
+        return transforms.ToPILImage()(x)
         
     def applyTransform(self, transforms):
         self._raw = transforms(self._raw)

@@ -16,11 +16,10 @@ class MNIST:
 
     def load_data(self):
         self._train_set = torchvision.datasets.MNIST(root=MNIST.FOLDER, train=True, download=True)
-        self._test_set = torchvision.datasets.MNIST(root=MNIST.FOLDER, train=False, download=True)
+        self._test_set = torchvision.datasets.MNIST(root=MNIST.FOLDER, train=False, download=True,)
 
     def _create_loader(self, data_set, batch):
         return torch.utils.data.DataLoader(data_set, batch,)
-
 
 class CIFAR:
     FOLDER='./data/cifar10'

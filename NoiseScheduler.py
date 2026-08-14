@@ -17,9 +17,12 @@ class NoiseScheduler:
             self._num = torch.square(torch.cos(((self._tms/self.T + self.s)/(1+self.s))*(torch.pi/2)))
             self._denom = math.pow(math.cos((self.s/(1+self.s))*(torch.pi/2)), 2)
 
-            self._alphab = self._num/self._denom
-            self._alphas = (self._alphab[1:]/self._alphab[:-1]);
-            self._betas = 1-self._alphas
+            self._alphab = self._num / self._denom
+            
+            self._betas = 1 - (self._alphab[1:] / self._alphab[:-1])
+            self._betas = torch.clamp(self._betas, max=0.999)
+            
+            self._alphas = 1 - self._betas
 
         else:
             raise ValueError(f"Unknown mode {mode}")

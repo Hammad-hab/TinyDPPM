@@ -17,22 +17,31 @@ class ForwardDiffusion:
         return DiffusionImage(t[0][0]), t[1][0]
 
     def getNoisyTensor(self, x0, t):
-        eps = torch.randn_like(x0)     
-        alpha = self.ns._alphab[t].view(-1, 1, 1, 1)        
+        eps = torch.randn_like(x0)
+        alpha = self.ns._alphab[t].view(-1, 1, 1, 1)
         xt = torch.sqrt(alpha) * x0 + torch.sqrt(1-alpha)*eps
         return xt, eps
 
-    def reverse(self, x, noise, t) -> torch.Tensor:
-        a0 = ((1-self.ns._alphas[t])/(torch.sqrt(1-self.ns._alphab[t])))*noise
-        # print(self.ns._alphas[t])
-        a1 = (1/torch.sqrt(self.ns._alphas[t]))*(x-a0)
-        print(torch.sqrt(self.ns._alphas[t]))
-        z = torch.randn_like(x)
-        if t > 0:
-                z = torch.randn_like(x)
-                return a1 + torch.sqrt(self.ns._betas[t]) * z
-        return a1
-        
+    def reverse(self, x, noise, t):
+        alpha_bar_t = self.ns._alphab[t]
+        alpha_bar_prev = self.ns._alphab[t - 1]
+        alpha_t = self.ns._alphas[t - 1]
+        beta_t = self.ns._betas[t - 1]
+    
+        # reconstruct predicted x0 and clip it
+        x0_pred = (x - torch.sqrt(1 - alpha_bar_t) * noise) / torch.sqrt(alpha_bar_t)
+        x0_pred = x0_pred.clamp(-1.0, 1.0)
+    
+        # proper posterior mean using x0_pred and x_t
+        coef_x0 = torch.sqrt(alpha_bar_prev) * beta_t / (1 - alpha_bar_t)
+        coef_xt = torch.sqrt(alpha_t) * (1 - alpha_bar_prev) / (1 - alpha_bar_t)
+        mean = coef_x0 * x0_pred + coef_xt * x
+    
+        if t > 1:
+            posterior_var = (1 - alpha_bar_prev) / (1 - alpha_bar_t) * beta_t
+            return mean + torch.sqrt(posterior_var) * torch.randn_like(x)
+        return mean
+
 if __name__ == "__main__":
     ns = NoiseScheduler(1000, 'linear')
     fd = ForwardDiffusion(ns)
@@ -41,13 +50,13 @@ if __name__ == "__main__":
     next(cfitr)
     img, label = next(cfitr)
     x0 = img[0]
-    
+
     fig, axes = plt.subplots(1, 9, figsize=(36, 4))
-    
+
     for i in range(40, 50):
-        
+
         noisy, _ = fd.getNoisyImage(x0, i)
         axes[i - 41].imshow(noisy._raw.permute(1, 2, 0))
         axes[i - 41].axis("off")
-    
+
     plt.savefig("output.png")
