@@ -54,16 +54,7 @@ class TrainProcess:
             pred = self.model(x_t, t)
             loss = self.loss_criterion(pred, eps)
             loss.backward()
-
             
-            total_norm = torch.nn.utils.clip_grad_norm_(
-                self.model.parameters(),
-                float("inf")
-            )
-            
-            print("gradient norm:", total_norm.item())
-            
-
             self.optim.step()
             self.optim.zero_grad()
 
@@ -73,9 +64,9 @@ class TrainProcess:
     def train(self):
         for _ in range(self.epoch):
             print(f"[LOG] Current epoch {self.current_epoch}")
+            self.vm.setEpoch(self.current_epoch)
             loss = self._init_mbgd(self._train_step, self.ds.train_loader)
             self._loss.append(loss)
-            self.vm.setEpoch(self.current_epoch)
             self.vm.save()
             print(f'[LOG] loss: {loss}, epoch {self.current_epoch}')
             self.current_epoch += 1
