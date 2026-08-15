@@ -1,6 +1,9 @@
 # TinyDPPM
 
-<img src="assets/output.png"/>
+
+<div align="center">
+  <img src="assets/output.gif"/>
+</div>
 
 A small, from-scratch implementation of a **Denoising Diffusion Probabilistic Model (DDPM)** in PyTorch.
 
@@ -8,9 +11,7 @@ TinyDPPM isn't trying to be fast or state-of-the-art — it's built for learning
 
 ## How it works
 
-<div align="center">
-  <img src="assets/output.gif"/>
-</div>
+<img src="assets/output.png"/>
 
 1. **`NoiseScheduler`** precomputes the beta/alpha/alpha-bar schedule used throughout training and sampling, in either `linear` or `cosine` mode.
 2. **`ForwardDiffusion`** uses that schedule to noise a clean image to timestep `t` (`getNoisyTensor`), and to reverse a single denoising step given the model's predicted noise (`reverse`).
