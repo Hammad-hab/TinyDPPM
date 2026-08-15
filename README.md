@@ -8,6 +8,10 @@ TinyDPPM isn't trying to be fast or state-of-the-art — it's built for learning
 
 ## How it works
 
+<div align="center">
+  <img src="assets/output.gif"/>
+</div>
+
 1. **`NoiseScheduler`** precomputes the beta/alpha/alpha-bar schedule used throughout training and sampling, in either `linear` or `cosine` mode.
 2. **`ForwardDiffusion`** uses that schedule to noise a clean image to timestep `t` (`getNoisyTensor`), and to reverse a single denoising step given the model's predicted noise (`reverse`).
 3. **`UNET`** is a small convolutional U-Net (3 encoder blocks, a bottleneck, 3 decoder blocks with skip connections) that predicts the noise added at a given timestep. The timestep is turned into a sinusoidal embedding, passed through an MLP, and injected into every block via a learned linear projection.
