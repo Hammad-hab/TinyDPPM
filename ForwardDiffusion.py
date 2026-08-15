@@ -11,14 +11,18 @@ class ForwardDiffusion:
     def __init__(self, ns: NoiseScheduler):
         self.ns = ns
         self.T = ns.T
+        self.device = 'cpu'
+
+    def to(self, device):
+        self.device=device
 
     def getNoisyImage(self, x0: Union[DiffusionImage, torch.Tensor], t):
         t = self.getNoisyTensor(x0._raw if isinstance(x0, DiffusionImage) else x0, t)
         return DiffusionImage(t[0][0]), t[1][0]
 
     def getNoisyTensor(self, x0, t):
-        eps = torch.randn_like(x0)
-        alpha = self.ns._alphab[t].view(-1, 1, 1, 1)
+        eps = torch.randn_like(x0, device=self.device)
+        alpha = self.ns._alphab[t].view(-1, 1, 1, 1).to(self.device)
         xt = torch.sqrt(alpha) * x0 + torch.sqrt(1-alpha)*eps
         return xt, eps
 
@@ -27,16 +31,16 @@ class ForwardDiffusion:
         alpha_bar_prev = self.ns._alphab[t - 1]
         alpha_t = self.ns._alphas[t - 1]
         beta_t = self.ns._betas[t - 1]
-    
+
         # reconstruct predicted x0 and clip it
         x0_pred = (x - torch.sqrt(1 - alpha_bar_t) * noise) / torch.sqrt(alpha_bar_t)
         x0_pred = x0_pred.clamp(-1.0, 1.0)
-    
+
         # proper posterior mean using x0_pred and x_t
         coef_x0 = torch.sqrt(alpha_bar_prev) * beta_t / (1 - alpha_bar_t)
         coef_xt = torch.sqrt(alpha_t) * (1 - alpha_bar_prev) / (1 - alpha_bar_t)
         mean = coef_x0 * x0_pred + coef_xt * x
-    
+
         if t > 1:
             posterior_var = (1 - alpha_bar_prev) / (1 - alpha_bar_t) * beta_t
             return mean + torch.sqrt(posterior_var) * torch.randn_like(x)

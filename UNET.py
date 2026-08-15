@@ -11,10 +11,20 @@ class UNET(nn.Module):
             nn.ReLU(),
         )
 
+
     def sinusoidal_embedding(self, t, d):
-        i = torch.arange(d // 2, dtype=torch.float32)
-        freqs = t[:, None] / (10000 ** (2 * i[None, :] / d))         
-        return torch.cat([torch.sin(freqs), torch.cos(freqs)], dim=-1) 
+        i = torch.arange(
+            d // 2,
+            dtype=torch.float32,
+            device=t.device
+        )
+    
+        freqs = t[:, None] / (10000 ** (2 * i[None, :] / d))
+    
+        return torch.cat(
+            [torch.sin(freqs), torch.cos(freqs)],
+            dim=-1
+        ).to(device=t.device)
 
     def mlp_stack(self, d, d_hidden):
         return nn.Sequential(

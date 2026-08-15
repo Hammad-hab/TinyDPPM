@@ -22,15 +22,22 @@ class TrainProcess:
         
         self.optim = torch.optim.AdamW(self.model.parameters(), lr=1e-4)
         self.loss_criterion = nn.MSELoss()
-        
         self._train_step = self._init_train_fn()
+        self.device = 'cpu'
 
+    def to(self, device):
+        self.device = device
+        self.loss_criterion.to(device=device)
+
+    def set_start_epoch(self, ep):
+        self.current_epoch = ep
+    
     def _init_mbgd(self, step_fn, loader):
         avg_loss = []
         mbgd_epoch = 1
         for x_batch, _ in loader:
-            x0 = x_batch.to(torch.float32)
-            t = torch.randint(0, self.ns.T, (x0.shape[0],))
+            x0 = x_batch.to(torch.float32).to(self.device)
+            t = torch.randint(0, self.ns.T, (x0.shape[0],)).to(self.device)
             x_t, eps = self.fd.getNoisyTensor(x0, t)
             mbgd_loss = step_fn(x_t, eps, t)
             print(f"[LOG] Running MGBD Epoch {mbgd_epoch} with loss {_colorize_loss(self._prev_loss, mbgd_loss)}")

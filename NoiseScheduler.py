@@ -4,6 +4,14 @@ class NoiseScheduler:
     BetaStart = 1e-4
     BetaEnd=0.02
 
+    def to(self, device):
+       self._betas = self._betas.to(device=device)
+       self._num = self._num.to(device=device)
+       self._tms = self._tms.to(device=device)
+       self._alphab = self._alphab.to(device=device)
+       self._alphas = self._alphas.to(device=device)
+        
+        
     def __init__(self, time, mode="linear", device="cpu") -> None:
         self.T = time
         self.s = 0.008
@@ -29,10 +37,6 @@ class NoiseScheduler:
 
         self.to(device)
 
-    def to(self, device):
-        self._betas.to(device)
-        self._alphas.to(device)
-        self._alphab.to(device)
 
     def getAlpha(self, t):
          return self._alphas[t]

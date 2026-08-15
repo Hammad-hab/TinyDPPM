@@ -14,7 +14,7 @@ ns = NoiseScheduler(1200, "cosine")
 fd = ForwardDiffusion(ns)
 cf = CIFAR()
 vm = VersionManager(model, 'tinydppm')
-vm.load_epoch(196, True)
+vm.load_latest(True, True)
 
 x = torch.randn(1, 3, 32, 32)
 # cf = CIFAR()
