@@ -1,9 +1,9 @@
-# TinyDPPM
-
-
 <div align="center">
   <img src="assets/output.gif"/>
 </div>
+<br>
+    
+# TinyDPPM
 
 A small, from-scratch implementation of a **Denoising Diffusion Probabilistic Model (DDPM)** in PyTorch.
 
