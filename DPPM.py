@@ -9,7 +9,7 @@ from util import get_device
 EPOCHS, TIME = 1000, 1000
 
 device = get_device()
-    
+print(f'[DEVICE] Using device {device}') 
 ns = NoiseScheduler(TIME, 'cosine')
 ns.to(device)
 fd = ForwardDiffusion(ns)

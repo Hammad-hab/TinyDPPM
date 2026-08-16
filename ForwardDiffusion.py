@@ -1,7 +1,7 @@
 from typing import Union
 
 import torch, math
-from Datasets import CIFAR
+from Datasets import CIFAR, Flowers102
 import matplotlib.pyplot as plt
 from torchvision import transforms
 from Image import DiffusionImage
@@ -47,14 +47,17 @@ class ForwardDiffusion:
         return mean
 
 if __name__ == "__main__":
-    ns = NoiseScheduler(1000, 'linear')
+    ns = NoiseScheduler(1000, 'cosine')
     fd = ForwardDiffusion(ns)
-    cf = CIFAR(transforms.ToTensor())
+    transform = transforms.Compose([
+        transforms.Resize((256, 256)),
+        transforms.ToTensor(),
+    ])
+    cf = Flowers102(transform)
     cfitr = iter(cf.train_loader)
     next(cfitr)
     img, label = next(cfitr)
     x0 = img[0]
-
     fig, axes = plt.subplots(1, 9, figsize=(36, 4))
 
     for i in range(40, 50):
