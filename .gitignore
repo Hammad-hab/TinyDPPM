@@ -2,5 +2,7 @@
 data/
 data/*
 versions/*
+vae-tests/*
+vae-tests/
 versions/
 .DS_Store

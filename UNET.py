@@ -11,7 +11,6 @@ class UNET(nn.Module):
             nn.ReLU(),
         )
 
-
     def sinusoidal_embedding(self, t, d):
         i = torch.arange(
             d // 2,
