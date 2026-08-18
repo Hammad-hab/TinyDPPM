@@ -28,8 +28,8 @@ class Encoder(nn.Module):
             nn.BatchNorm2d(64),
             nn.ReLU(),
         )
-        self.mu = nn.Conv2d(64, 3, kernel_size=3, padding=1)      # narrow to 3 only HERE
-        self.logvar = nn.Conv2d(64, 3, kernel_size=3, padding=1)  # same
+        self.mu = nn.Conv2d(64, 16, kernel_size=3, padding=1)      # narrow to 3 only HERE
+        self.logvar = nn.Conv2d(64, 16, kernel_size=3, padding=1)  # same
 
     def forward(self, x):
         h = self.h(x)
@@ -41,7 +41,7 @@ class Encoder(nn.Module):
 class Decoder(nn.Module):
     def __init__(self, indim=256, hiddendim=128, ltdim=32) -> None:
         super().__init__()
-        self.convt1 = nn.ConvTranspose2d(3, 64, 3, stride=2, padding=1, output_padding=1)
+        self.convt1 = nn.ConvTranspose2d(16, 64, 3, stride=2, padding=1, output_padding=1)
         self.bnorm0 = nn.BatchNorm2d(64)
         self.convt12 = nn.ConvTranspose2d(64, 128, 3, stride=1, padding=1, output_padding=0)
         self.bnorm12 = nn.BatchNorm2d(128)
@@ -49,7 +49,7 @@ class Decoder(nn.Module):
         self.bnorm = nn.BatchNorm2d(64)
         self.convt2 = nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=1)
         self.bnorm2 = nn.BatchNorm2d(32)
-        self.convt3 = nn.ConvTranspose2d(32, 3, 3, stride=2, padding=1, output_padding=1)
+        self.convt3 = nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1)
 
     def forward(self, z):
         z = F.relu(self.bnorm0(self.convt1(z)))
