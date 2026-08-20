@@ -49,7 +49,7 @@ class Decoder(nn.Module):
         self.bnorm = nn.BatchNorm2d(64)
         self.convt2 = nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=1)
         self.bnorm2 = nn.BatchNorm2d(32)
-        self.convt3 = nn.ConvTranspose2d(32, 16, 3, stride=2, padding=1, output_padding=1)
+        self.convt3 = nn.ConvTranspose2d(32, 3, 3, stride=2, padding=1, output_padding=1)
 
     def forward(self, z):
         z = F.relu(self.bnorm0(self.convt1(z)))

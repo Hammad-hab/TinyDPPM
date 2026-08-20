@@ -31,6 +31,7 @@ Training (`DPPM.py`) and sampling (`Generation.py`) are both built out of these 
 | `Generation.py` | Entry point for sampling — runs the full reverse diffusion process and saves `output.png` |
 | `NoiseScheduler.py` | Beta/alpha/alpha-bar schedule (linear or cosine) |
 | `ForwardDiffusion.py` | Forward noising (`q`) and single-step reverse (`p`) diffusion math |
+| `VariationalAutoEncoder.py` | Simple VAE, 16x16 latent space |
 | `UNET.py` | The noise-prediction model, with timestep embeddings |
 | `TrainProcess.py` | Training loop (mini-batch gradient descent, loss logging) |
 | `VersionManager.py` | Checkpoint saving/loading, crash-safe autosave |
