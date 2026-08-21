@@ -75,7 +75,7 @@ class VersionManager:
             # Completed epoch: move to the next one
             self.startepoch = latest + 1
         
-        print(f"Found latest epoch {latest}")
+        print(f"[{self.name}] Found latest epoch {latest}")
         return self.load_epoch(latest, inplace=inplace)
 
     def _filepth(self, path):

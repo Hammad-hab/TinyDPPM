@@ -30,6 +30,7 @@ class TrainProcess:
     def to(self, device):
         self.device = device
         self.loss_criterion.to(device=device)
+        self.vae.to(device)
 
     def _getVAE(self,):
         vae = VAE()

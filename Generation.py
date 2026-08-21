@@ -17,7 +17,7 @@ fd = ForwardDiffusion(ns)
 cf = CIFAR()
 
 vae_vm = VersionManager(vae, 'tinyvae')
-vm = VersionManager(model, 'tinydppm')
+vm = VersionManager(model, 'tiny-latentdppm')
 
 vae_vm.load_latest(True, True)
 vm.load_latest(True, True)
