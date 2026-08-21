@@ -55,8 +55,8 @@ class UNET(nn.Module):
         self.D = 128
         self.cblocks = [32, 64, 128, 256, 256, 128, 64, 32, ]
         self.proj_layers = nn.ModuleList([nn.Linear(self.D, c) for c in self.cblocks])
-       
-        self.enc1 = self._encoder_block(3, 32)   
+
+        self.enc1 = self._encoder_block(16, 32)   
         self.enc2 = self._encoder_block(32, 64)  
         self.enc3 = self._encoder_block(64, 128) 
         
@@ -69,7 +69,7 @@ class UNET(nn.Module):
         self.dec2 = self._decoder_block(192, 64)  
         self.dec3 = self._decoder_block(96, 32) 
         self.dec4 = nn.Sequential(
-            nn.ConvTranspose2d(32, 3, 3, padding=1),
+            nn.ConvTranspose2d(32, 16, 3, padding=1),
         )
         
     def forward(self, x, t):
