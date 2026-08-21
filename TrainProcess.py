@@ -6,6 +6,7 @@ from NoiseScheduler import NoiseScheduler
 from UNET import UNET
 from VersionManager import VersionManager
 from util import _colorize_loss
+from VarationalAutoEncoder import VAE
 
 class TrainProcess:
     def __init__(self, ns: NoiseScheduler, fd: ForwardDiffusion, unet:UNET, ds, vm: VersionManager, epochs: int) -> None:
@@ -24,10 +25,17 @@ class TrainProcess:
         self.loss_criterion = nn.MSELoss()
         self._train_step = self._init_train_fn()
         self.device = 'cpu'
+        self.vae = self._getVAE()
 
     def to(self, device):
         self.device = device
         self.loss_criterion.to(device=device)
+
+    def _getVAE(self,):
+        vae = VAE()
+        vm = VersionManager(vae, "tinyvae")
+        vm.load_latest(True, True)
+        return vae
 
     def set_start_epoch(self, ep):
         self.current_epoch = ep
@@ -38,7 +46,9 @@ class TrainProcess:
         for x_batch, _ in loader:
             x0 = x_batch.to(torch.float32).to(self.device)
             t = torch.randint(0, self.ns.T, (x0.shape[0],)).to(self.device)
-            x_t, eps = self.fd.getNoisyTensor(x0, t)
+            with torch.no_grad():
+                mu, _ = self.vae.encoder(x0)
+            x_t, eps = self.fd.getNoisyTensor(mu, t)
             mbgd_loss = step_fn(x_t, eps, t)
             print(f"[LOG] Running MGBD Epoch {mbgd_epoch} with loss {_colorize_loss(self._prev_loss, mbgd_loss)}")
             self._prev_loss = mbgd_loss
