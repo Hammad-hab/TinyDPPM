@@ -74,7 +74,7 @@ class UNET(nn.Module):
         
     def forward(self, x, t):
         temb = self.mlp(self.sinusoidal_embedding(t, self.D))
-        # x is [3, 32, 32], standard CIFAR resolution
+        # x is [16, 32, 32], standard CIFAR resolution
         layers = [proj(temb)[:, :, None, None] for proj in self.proj_layers]
             
         x1 = self.enc1(x) # [32, 16, 16]
@@ -108,6 +108,6 @@ class UNET(nn.Module):
         x10 = self.dec3(x9) # [32, 32, 32]
         x10 = x10 + layers[7]
         
-        out = self.dec4(x10) # [3, 32, 32]
+        out = self.dec4(x10) # [16, 32, 32]
         
         return out

@@ -6,4 +6,6 @@ vae-tests/*
 vae-tests/
 versions/
 .DS_Store
-xncc.md
+xncc.
+tensorboard/
+tensorboard/*
