@@ -9,3 +9,6 @@ versions/
 xncc.
 .tensorboard/
 .tensorboard/*
+runs/*
+runs/
+beta_pipe
