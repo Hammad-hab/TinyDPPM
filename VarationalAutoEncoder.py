@@ -107,22 +107,24 @@ if __name__ == "__main__":
 
     vm = VersionManager(model, "tinyvae")
 
-    beta = 2.0
 
     # TensorBoard
     writer = SummaryWriter("runs/tiny-vae")
 
     vm.load_latest(True, True)
+    beta = 1.5
 
     @vm.save_on_fail
     def train():
 
         for epoch in range(vm.startepoch, 1000):
-
+            with open("beta_read", "r") as f:
+                beta = float(f.read().strip())
+                print(f'[VAE] Received  beta={beta}')
+                
             vm.setEpoch(epoch)
 
             print(f'[VAE_EPOCH] {epoch}')
-            print(f'[VAE] Received  beta={beta}')
 
             epoch_losses = []
             epoch_recons = []
