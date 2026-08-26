@@ -103,7 +103,7 @@ if __name__ == "__main__":
     cf = Flowers102(transform)
 
     loss_criterion = BCELoss(reduction="sum")
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-5)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
 
     vm = VersionManager(model, "tinyvae")
 
@@ -118,13 +118,18 @@ if __name__ == "__main__":
     def train():
 
         for epoch in range(vm.startepoch, 1000):
-            with open("beta_read", "r") as f:
-                beta = float(f.read().strip())
-                print(f'[VAE] Received  beta={beta}')
+            if not os.path.isfile('beta_read'): 
+                with open("beta_read", "+x") as f:
+                    beta = 1.5
+                    f.write(str(beta))
+            else:
+                with open("beta_read", "r") as f:
+                    beta = float(f.read().strip())
                 
             vm.setEpoch(epoch)
 
             print(f'[VAE_EPOCH] {epoch}')
+            print(f'[VAE] Received  beta={beta}')
 
             epoch_losses = []
             epoch_recons = []
@@ -161,7 +166,7 @@ if __name__ == "__main__":
                     global_step
                 )
                 writer.add_scalar(
-                    "MBGD/kld_loss",
+                    "MBGD/recon_loss",
                     recon_loss.item(),
                     global_step
                 )

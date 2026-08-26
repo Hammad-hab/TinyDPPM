@@ -16,18 +16,19 @@ fd = ForwardDiffusion(ns)
 
 vae_vm = VersionManager(vae, 'tinyvae')
 vm = VersionManager(model, 'tiny-latentdppm')
-vae_vm.load_latest(True, True)
+# vae_vm.load_latest(True, True)
+vae_vm.load_epoch(283, True)
 vm.load_latest(True, True)
 model.eval()
 vae.eval()
 
-import torch
+# import torch
 z = torch.randn(4, 16, 32, 32)  # sample directly from N(0,1), no diffusion involved
-with torch.no_grad():
-    out = vae.decoder(z)
-for i in range(4):
-    DiffusionImage(out[i]).getAsPIL().save(f"vae_prior_sample_{i}.png")
-exit()
+# with torch.no_grad():
+#     out = vae.decoder(z)
+# for i in range(4):
+#     DiffusionImage(out[i]).getAsPIL().save(f"vae_prior_sample_{i}.png")
+# exit()
 transform = transforms.Compose([transforms.Resize((256,256)), transforms.ToTensor()])
 cf = Flowers102(transform)
 x_img, _ = next(iter(cf.train_loader))
@@ -42,7 +43,7 @@ with torch.no_grad():
     DiffusionImage(recon[0]).getAsPIL().save("sanity_vae_only.png")
 
     # sanity check 2: partial noise + partial denoise
-    t_start = 999  # moderate noise, not full 999
+    t_start = 500  # moderate noise, not full 999
     tt = torch.tensor([t_start])
     x_noisy, _ = fd.getNoisyTensor(mu, tt)
 

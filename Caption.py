@@ -1,1 +1,0 @@
-# TODO: Implement a system that turns an image -> text during training.
