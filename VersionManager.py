@@ -13,6 +13,7 @@ class VersionManager:
 
     def setEpoch(self, e):
         self._epoch = e;
+
         
     def save(self, failprotocol=False):
         if self._epoch == 0:

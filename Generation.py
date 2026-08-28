@@ -18,15 +18,16 @@ ns = NoiseScheduler(1000, "cosine")
 fd = ForwardDiffusion(ns)
 vm.load_latest(True, True)
 
+x = torch.randn(1, 3, 256, 256).to(device)
+
 ns.to(device)
 fd.to(device)
 model.to(device)
 
-x = torch.randn(1, 3, 256, 256)
-
+model.eval()
 with torch.no_grad():
-    for t in reversed(range(1, TIME)):
-        tensor_t = torch.tensor([t])
+    for t in reversed(range(1, TIME+1)):
+        tensor_t = torch.tensor([t-1], device=device)
         noise = model(x, tensor_t)
         x = fd.reverse(x, noise, t)
         
