@@ -25,16 +25,16 @@ class TrainProcess:
         self._valloss = []
         self._prev_loss = None
         
-        self.optim = torch.optim.AdamW(self.model.parameters(), lr=1e-6)
+        self.optim = torch.optim.AdamW(self.model.parameters(), lr=1e-4)
         self.loss_criterion = nn.MSELoss()
         self._train_step = self._init_train_fn()
         self.device = 'cpu'
-        self.vae = self._getVAE()
+        # self.vae = self._getVAE()
 
     def to(self, device):
         self.device = device
         self.loss_criterion.to(device=device)
-        self.vae.to(device)
+        # self.vae.to(device)
 
     def _getVAE(self,):
         vae = VAE()
@@ -51,9 +51,9 @@ class TrainProcess:
         for x_batch, _ in loader:
             x0 = x_batch.to(torch.float32).to(self.device)
             t = torch.randint(0, self.ns.T, (x0.shape[0],)).to(self.device)
-            with torch.no_grad():
-                mu, _ = self.vae.encoder(x0)
-            x_t, eps = self.fd.getNoisyTensor(mu, t)
+            # with torch.no_grad():
+            #     mu, _ = self.vae.encoder(x0)
+            x_t, eps = self.fd.getNoisyTensor(x0, t)
             mbgd_loss = step_fn(x_t, eps, t)
             if not DISABLE_LOGS:
                 print(f"[LOG] Running MGBD Epoch {mbgd_epoch} with loss {_colorize_loss(self._prev_loss, mbgd_loss)}")
@@ -71,7 +71,6 @@ class TrainProcess:
             loss = self.loss_criterion(pred, eps)
             self.writer.add_scalar("Loss/train", loss.item(), self.global_step)
             loss.backward()
-            
             
             self.optim.step()
             self.optim.zero_grad()
