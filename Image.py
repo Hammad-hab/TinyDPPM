@@ -17,11 +17,7 @@ class DiffusionImage:
         
     def getAsPIL(self):
         x = self._raw
-    
-        # if model output is in [-1, 1]
-        x = (x + 1) / 2
-        x = x.clamp(0, 1)
-    
+        x = x.clamp(0, 1)   # data is already [0,1], no shift needed
         return transforms.ToPILImage()(x)
         
     def applyTransform(self, transforms):

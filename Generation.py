@@ -1,35 +1,51 @@
-
-from Image import DiffusionImage
-from TrainProcess import TrainProcess
+import torch
 from NoiseScheduler import NoiseScheduler
 from ForwardDiffusion import ForwardDiffusion
 from UNET import UNET
-from VersionManager import VersionManager
+from Datasets import Flowers102
+from Image import DiffusionImage
 from torchvision import transforms
-import torch
 from util import get_device
 
-EPOCHS, TIME = 1000, 1000
-
 device = get_device()
-model = UNET()
-vm = VersionManager(model, "tiny-dppm")
+STEPS = 1000
+
 ns = NoiseScheduler(1000, "cosine")
 fd = ForwardDiffusion(ns)
-vm.load_latest(True, True)
-
-x = torch.randn(1, 3, 256, 256).to(device)
-
 ns.to(device)
 fd.to(device)
-model.to(device)
 
+model = UNET().to(device)   # fresh model, patched architecture
+optim = torch.optim.AdamW(model.parameters(), lr=1e-4)
+loss_fn = torch.nn.MSELoss()
+
+# grab ONE real image and freeze it
+transform = transforms.Compose([transforms.Resize((256, 256)), transforms.ToTensor()])
+ds = Flowers102(transform, batch_size=1)
+x0, _ = next(iter(ds.train_loader))
+x0 = x0.to(device)   # shape [1, 3, 256, 256]
+
+model.train()
+for step in range(STEPS):
+    t = torch.randint(0, ns.T, (1,), device=device)
+    x_t, eps = fd.getNoisyTensor(x0, t)
+    pred = model(x_t, t)
+    loss = loss_fn(pred, eps)
+
+    optim.zero_grad()
+    loss.backward()
+    optim.step()
+
+    if step % 50 == 0:
+        print(f"step {step}, loss {loss.item():.4f}")
+
+# now sample from pure noise and see if it reconstructs that ONE flower
 model.eval()
+x = torch.randn(1, 3, 256, 256, device=device)
 with torch.no_grad():
-    for t in reversed(range(1, TIME+1)):
-        tensor_t = torch.tensor([t-1], device=device)
+    for t in reversed(range(1, ns.T + 1)):
+        tensor_t = torch.tensor([t], device=device)
         noise = model(x, tensor_t)
         x = fd.reverse(x, noise, t)
-        
-img = DiffusionImage(x[0])
-img.getAsPIL().save('output.png')
+
+DiffusionImage(x[0]).getAsPIL().save("overfit_test.png")

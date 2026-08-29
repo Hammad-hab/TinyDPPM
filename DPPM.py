@@ -19,15 +19,19 @@ ns = NoiseScheduler(TIME, 'cosine')
 ns.to(device)
 fd = ForwardDiffusion(ns)
 fd.to(device)
-ds = Flowers102(transform, batch_size=16)
+ds = Flowers102(transform, batch_size=32)
 model = UNET()
 model.to(device)
 vm = VersionManager(model, 'tiny-dppm')
-vm.load_latest(True, True)
 procs = TrainProcess(ns, fd, model, ds, vm, EPOCHS)
+vm._optim = procs.optim
+vm.load_latest(True, True)
 procs.to(device)
 procs.set_start_epoch(vm.startepoch)
 
+for _ in range(vm.startepoch):
+    procs.scheduler.step() # Resync the annealing scheduler
+    
 @vm.save_on_fail
 def main():
     procs.train()

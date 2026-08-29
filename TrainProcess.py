@@ -26,6 +26,9 @@ class TrainProcess:
         self._prev_loss = None
         
         self.optim = torch.optim.AdamW(self.model.parameters(), lr=1e-4)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+            self.optim, T_max=self.epoch, eta_min=1e-7
+        )
         self.loss_criterion = nn.MSELoss()
         self._train_step = self._init_train_fn()
         self.device = 'cpu'
@@ -93,6 +96,7 @@ class TrainProcess:
             )
             self._loss.append(loss)
             self.vm.save()
+            self.scheduler.step()
             if not DISABLE_LOGS:
                 print(f'[LOG] loss: {loss}, epoch {self.current_epoch}')
             self.current_epoch += 1
