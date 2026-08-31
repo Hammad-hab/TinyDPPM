@@ -8,7 +8,7 @@ from torchvision import transforms
 from util import get_device
 
 device = get_device()
-STEPS = 1000
+STEPS = 5000
 
 ns = NoiseScheduler(1000, "cosine")
 fd = ForwardDiffusion(ns)

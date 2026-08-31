@@ -33,7 +33,7 @@ class ForwardDiffusion:
         beta_t = self.ns._betas[t - 1]
     
         x0_pred = (x - torch.sqrt(1 - alpha_bar_t) * noise) / torch.sqrt(alpha_bar_t)
-        x0_pred = x0_pred.clamp(-1, 1)  # latents aren't [-1,1] like pixels, pick a range that matches your VAE's latent stats
+        x0_pred = x0_pred.clamp(-3, 3)  # latents aren't [-1,1] like pixels, pick a range that matches your VAE's latent stats
     
         coef_x0 = torch.sqrt(alpha_bar_prev) * beta_t / (1 - alpha_bar_t)
         coef_xt = torch.sqrt(alpha_t) * (1 - alpha_bar_prev) / (1 - alpha_bar_t)
