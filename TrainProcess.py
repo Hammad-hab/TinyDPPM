@@ -94,6 +94,7 @@ class TrainProcess:
                 loss,
                 self.current_epoch
             )
+            
             self._loss.append(loss)
             self.vm.save()
             self.scheduler.step()

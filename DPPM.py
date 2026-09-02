@@ -1,3 +1,4 @@
+from Generator import Generator
 from TrainProcess import TrainProcess
 from NoiseScheduler import NoiseScheduler
 from ForwardDiffusion import ForwardDiffusion
@@ -7,7 +8,7 @@ from VersionManager import VersionManager
 from util import get_device
 from torchvision import transforms
 
-EPOCHS, TIME = 1000, 1000
+EPOCHS=1000
 
 device = get_device()
 transform = transforms.Compose([
@@ -15,7 +16,7 @@ transform = transforms.Compose([
     transforms.ToTensor(),
 ])
 print(f'[DEVICE] Using device {device}') 
-ns = NoiseScheduler(TIME, 'cosine')
+ns = NoiseScheduler(Generator.TIME, 'cosine')
 ns.to(device)
 fd = ForwardDiffusion(ns)
 fd.to(device)
