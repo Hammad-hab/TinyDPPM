@@ -1,16 +1,14 @@
 from torch import nn
 import torch.nn.functional as F
 import torch
-from torch.nn.modules.loss import BCELoss
+from torch.nn.modules.loss import MSELoss
 from torchvision import transforms
 from Datasets import Flowers102
 from VersionManager import VersionManager
 import numpy as np
-import os
-import errno
 from torch.utils.tensorboard import SummaryWriter
 
-class ColourCNN(nn.Module):
+class DRGBAutoEncoder(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         
@@ -64,6 +62,55 @@ class ColourCNN(nn.Module):
         return x
         
 if __name__ == "__main__":
-    ds = Flowers102()
-    ...
-    
+    cf = Flowers102()
+    model = DRGBAutoEncoder()
+
+    loss_criterion = MSELoss(reduction="sum")
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
+
+    vm = VersionManager(model, "tiny-drgbae")
+    writer = SummaryWriter("runs/tiny-drgbae")
+    vm.load_latest(True, True)
+
+    @vm.save_on_fail
+    def train():
+        model.train()
+        for epoch in range(vm.startepoch, 1000):
+            epoch_losses = []
+
+            for mbgd_step, (x, _) in enumerate(cf.train_loader):
+
+                delta_rgb = model(x)
+                reconstructed = x + delta_rgb
+                loss = loss_criterion(reconstructed, x)
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+                loss_value = loss.item()
+
+                epoch_losses.append(loss_value)
+
+                global_step = epoch * len(cf.train_loader) + mbgd_step
+
+                writer.add_scalar(
+                    "MBGD/loss",
+                    loss_value,
+                    global_step
+                )
+
+            # Epoch averages
+            avg_loss = np.mean(epoch_losses)
+
+            print("epoch average:", avg_loss)
+
+            # Epoch-level TensorBoard data
+            writer.add_scalar("Epoch/loss", avg_loss, epoch)
+            writer.flush()
+
+            vm.save()
+
+    train()
+
+    writer.close()

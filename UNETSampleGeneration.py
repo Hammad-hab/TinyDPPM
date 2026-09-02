@@ -14,7 +14,7 @@ model = UNET()
 vm = VersionManager(model, "tiny-dppm")
 ns = NoiseScheduler(1000, "cosine")
 fd = ForwardDiffusion(ns)
-vm.load_latest(True, True)
+vm.load_epoch(526, True)
 
 x = torch.randn(N_SAMPLES, 3, 256, 256).to(device)
 ns.to(device)
