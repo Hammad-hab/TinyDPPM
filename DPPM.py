@@ -8,7 +8,7 @@ from VersionManager import VersionManager
 from util import get_device
 from torchvision import transforms
 
-EPOCHS=1000
+EPOCHS=1500
 
 device = get_device()
 transform = transforms.Compose([

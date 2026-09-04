@@ -1,4 +1,3 @@
-from UNET import UNET
 from Image import DiffusionImage
 from Generator import Generator
 
