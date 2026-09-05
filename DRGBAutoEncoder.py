@@ -4,6 +4,7 @@ import torch
 from torch.nn.modules.loss import MSELoss
 from torchvision import transforms
 from Datasets import Flowers102
+from PetalSelection import PetalSelection
 from VersionManager import VersionManager
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
@@ -62,12 +63,17 @@ class DRGBAutoEncoder(nn.Module):
         return x
         
 if __name__ == "__main__":
-    cf = Flowers102()
+    transform = transforms.Compose([
+        transforms.Resize((256, 256)),
+        transforms.ToTensor(),
+    ])
+    cf = Flowers102(transform)
     model = DRGBAutoEncoder()
 
     loss_criterion = MSELoss(reduction="sum")
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
-
+    selector = PetalSelection(thres=0.25, out_bright_mul=1.5)
+    
     vm = VersionManager(model, "tiny-drgbae")
     writer = SummaryWriter("runs/tiny-drgbae")
     vm.load_latest(True, True)
@@ -79,9 +85,9 @@ if __name__ == "__main__":
             epoch_losses = []
 
             for mbgd_step, (x, _) in enumerate(cf.train_loader):
-
-                delta_rgb = model(x)
-                reconstructed = x + delta_rgb
+                x0 = selector(x)
+                delta_rgb = model(x0)
+                reconstructed = x0 + delta_rgb
                 loss = loss_criterion(reconstructed, x)
 
                 optimizer.zero_grad()

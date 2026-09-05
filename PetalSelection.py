@@ -15,17 +15,12 @@ class PetalSelection:
 
     def __call__(self, img):
         noise = torch.rand_like(img)
-    
         noisy = img - noise
         mask = noisy >= self.thres
-        out = torch.where(mask, noisy + noise, 0)
-        
+        out = torch.where(mask, noisy + noise, torch.zeros_like(img))
         return F.avg_pool2d(
-            out.unsqueeze(0),
-            kernel_size=5,
-            stride=1,
-            padding=2
-        ).squeeze(0)*self.out_bright_mul
+            out, kernel_size=5, stride=1, padding=2
+        ) * self.out_bright_mul
         
 
 if __name__ == "__main__":
