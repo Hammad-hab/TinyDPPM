@@ -3,8 +3,8 @@ import torch
 
 
 class VersionManager:
-    def __init__(self, model, name="model", optim=None) -> None:
-        self.dir = "versions/"
+    def __init__(self, model, name="model", optim=None, dir="versions/") -> None:
+        self.dir = dir
         self.name = name
         self.startepoch = 0
         self._epoch = 0

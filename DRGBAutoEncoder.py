@@ -74,7 +74,7 @@ if __name__ == "__main__":
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
     selector = PetalSelection(thres=0.25, out_bright_mul=1.5)
     
-    vm = VersionManager(model, "tiny-drgbae")
+    vm = VersionManager(model, "tiny-drgbae", dir="versions/tiny-drgbae/")
     writer = SummaryWriter("runs/tiny-drgbae")
     vm.load_latest(True, True)
 
@@ -83,7 +83,7 @@ if __name__ == "__main__":
         model.train()
         for epoch in range(vm.startepoch, 1000):
             epoch_losses = []
-
+            vm.setEpoch(epoch)
             for mbgd_step, (x, _) in enumerate(cf.train_loader):
                 x0 = selector(x)
                 delta_rgb = model(x0)
@@ -101,7 +101,7 @@ if __name__ == "__main__":
                 global_step = epoch * len(cf.train_loader) + mbgd_step
 
                 writer.add_scalar(
-                    "MBGD/loss",
+                    "Loss/train-drgb",
                     loss_value,
                     global_step
                 )
@@ -112,7 +112,7 @@ if __name__ == "__main__":
             print("epoch average:", avg_loss)
 
             # Epoch-level TensorBoard data
-            writer.add_scalar("Epoch/loss", avg_loss, epoch)
+            writer.add_scalar("Loss/loss-drgb", avg_loss, epoch)
             writer.flush()
 
             vm.save()
