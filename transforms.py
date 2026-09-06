@@ -112,6 +112,7 @@ class ImageWarp:
         )
 
         grid = torch.stack((x, y), dim=-1).unsqueeze(0).expand(B, -1, -1, -1)
+        
         displacement = torch.randn(
                 B, H, W, 2,
                 device=img.device
@@ -123,14 +124,20 @@ class ImageWarp:
                 stride=1,
                 padding=7
         )
-        displacement = displacement.permute(0, 2, 3, 1) # for avg pool2d
-        
+        displacement = displacement.permute(0, 2, 3, 1) # 
+        displacement *= self.strength
 
+        displaced = grid + displacement
+        sample = F.grid_sample(img, displaced)
+
+        return sample
+    
 if __name__ == "__main__":
     transform = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.ToTensor(),
         PetalSelection(thres=0.25, out_bright_mul=1.5),
+        ImageWarp(strength=0.5)
     ])
 
     ds = Flowers102(transform)
