@@ -60,7 +60,7 @@ class DRGBAutoEncoder(nn.Module):
         x = self.l6(x)
         x = self.l7(x)
         x = self.l8(x)
-        return x
+        return F.tanh(x)
         
 if __name__ == "__main__":
     transform = transforms.Compose([

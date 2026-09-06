@@ -21,7 +21,6 @@ class PetalSelection:
         return F.avg_pool2d(
             out, kernel_size=5, stride=1, padding=2
         ) * self.out_bright_mul
-        
 
 if __name__ == "__main__":
     transform = transforms.Compose([
