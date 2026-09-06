@@ -21,7 +21,6 @@ class Generator:
         self.model.to(self._device)
         self.loaded_epoch = None
 
-        pass
 
     def load(self, epoch):
         self.vm.load_epoch(epoch, True)
