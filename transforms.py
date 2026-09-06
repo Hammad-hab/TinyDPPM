@@ -82,7 +82,7 @@ class PetalSelection:
         
         mask = img >= self.thres
 
-        dist = torch.sqrt(x**2 + y**2)-0.1
+        dist = torch.sqrt(x**2 + y**2)-self.out_bright_mul
         
         circle = (1 - dist).clamp(0, 1)
         circle = circle.unsqueeze(0).expand_as(img)
@@ -95,7 +95,7 @@ class PetalSelection:
 
 class ImageWarp:
     def __init__(self, strength=0.1) -> None:
-        self.strength = 0.1
+        self.strength = strength
         pass
 
     def __call__(self, img):
@@ -124,20 +124,29 @@ class ImageWarp:
                 stride=1,
                 padding=7
         )
-        displacement = displacement.permute(0, 2, 3, 1) # 
+        displacement = displacement.permute(0, 2, 3, 1) 
         displacement *= self.strength
 
         displaced = grid + displacement
-        sample = F.grid_sample(img, displaced)
+        sample = F.grid_sample(
+                img, 
+                displaced, 
+                mode="bilinear",
+                padding_mode="border",
+                align_corners=True
+            )
 
+        if unbatched:
+            # remove extra B dimension
+            sample = sample.squeeze(0)
         return sample
     
 if __name__ == "__main__":
     transform = transforms.Compose([
         transforms.Resize((256, 256)),
         transforms.ToTensor(),
-        PetalSelection(thres=0.25, out_bright_mul=1.5),
-        ImageWarp(strength=0.5)
+        PetalSelection(thres=0.25, out_bright_mul=0.5),
+        ImageWarp(strength=1.0)
     ])
 
     ds = Flowers102(transform)
@@ -151,10 +160,9 @@ if __name__ == "__main__":
         img, _ = dataset[idx]
         imgs.append(img.clamp(0, 1))  # clamp in case out_bright_mul pushes values >1
 
-    grid = make_grid(imgs, nrow=4, padding=2)
+    grid = make_grid(imgs, nrow=4)
 
     plt.figure(figsize=(10, 10))
     plt.imshow(grid.permute(1, 2, 0).numpy())
     plt.axis("off")
-    plt.title(f"{n_samples} random petal selections from full dataset")
     plt.show()
