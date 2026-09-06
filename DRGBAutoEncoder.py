@@ -4,7 +4,7 @@ import torch
 from torch.nn.modules.loss import MSELoss
 from torchvision import transforms
 from Datasets import Flowers102
-from PetalSelection import PetalSelection
+from transforms import PetalSelection
 from VersionManager import VersionManager
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter

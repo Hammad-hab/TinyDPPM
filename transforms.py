@@ -1,3 +1,4 @@
+
 import torch
 import random
 import matplotlib.pyplot as plt
@@ -67,8 +68,11 @@ class PetalSelection:
         self.out_bright_mul = out_bright_mul
 
     def __call__(self, img):
-        noise = torch.rand_like(img)
-        C, H, W = img.shape
+        if len(img.shape) == 4:
+            B, C, H, W = img.shape
+        else:
+            C, H, W = img.shape
+            B = 0
         
         y, x = torch.meshgrid(
             torch.linspace(-1, 1, H, device=img.device),
@@ -76,16 +80,51 @@ class PetalSelection:
             indexing="ij"
         )
         
-        dist = torch.sqrt(x**2 + y**2)-0.5
+        mask = img >= self.thres
+
+        dist = torch.sqrt(x**2 + y**2)-0.1
         
         circle = (1 - dist).clamp(0, 1)
         circle = circle.unsqueeze(0).expand_as(img)
 
-        noisy = img * circle - noise
-        mask = noisy >= self.thres
+        noisy = img * circle
         out = torch.where(mask, noisy, torch.zeros_like(img))
-        out = torch.roll(out, 20) + noise*perlin_noise(256, 256, 32)
-        return out*2*circle
+        out = torch.roll(out, 20)
+        return out*circle
+
+
+class ImageWarp:
+    def __init__(self, strength=0.1) -> None:
+        self.strength = 0.1
+        pass
+
+    def __call__(self, img):
+        unbatched = img.ndim == 3
+        if unbatched:
+            img = img.unsqueeze(0)
+
+        B, C, H, W = img.shape
+     
+        y, x = torch.meshgrid(
+            torch.linspace(-1, 1, H, device=img.device),
+            torch.linspace(-1, 1, W, device=img.device),
+            indexing="ij"
+        )
+
+        grid = torch.stack((x, y), dim=-1).unsqueeze(0).expand(B, -1, -1, -1)
+        displacement = torch.randn(
+                B, H, W, 2,
+                device=img.device
+        )
+        displacement = displacement.permute(0, 3, 1, 2) # for avg pool2d
+        displacement = F.avg_pool2d(
+                displacement,
+                kernel_size=15,
+                stride=1,
+                padding=7
+        )
+        displacement = displacement.permute(0, 2, 3, 1) # for avg pool2d
+        
 
 if __name__ == "__main__":
     transform = transforms.Compose([
