@@ -37,3 +37,16 @@ class Generator:
                 noise = self.model(x, tensor_t)
                 x = self.fd.reverse(x, noise, t)
         return x
+
+    def generate_iter(self, N):
+        if not self.loaded_epoch:
+            raise ValueError('No Epoch Loaded, load an epoch with .load before generating')
+        self.model.eval()
+        x = torch.randn(N, 3, 256, 256, device=self._device)
+        with torch.no_grad():
+            for t in reversed(range(1, Generator.TIME + 1)):
+                tensor_t = torch.full((N,), t, device=self._device)
+                noise = self.model(x, tensor_t)
+                x = self.fd.reverse(x, noise, t)
+                yield x
+        

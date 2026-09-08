@@ -5,7 +5,6 @@ from Datasets import CIFAR
 import matplotlib.pyplot as plt
 from torchvision import transforms
 
-    
 class DiffusionImage:
     
     def __init__(self, contents: Union[torch.Tensor, Image]) -> None:
@@ -24,8 +23,14 @@ class DiffusionImage:
     @classmethod
     def generate(cls, generator, epoch=1, N=1):
         generator.load(epoch)
-        tensors = generator.generate( N)
+        tensors = generator.generate(N)
         return DiffusionImages([cls(x) for x in tensors])
+
+    @classmethod
+    def generate_iter(cls, generator, epoch=1, N=1):
+        generator.load(epoch)
+        for tensors in generator.generate_iter(N):
+            yield DiffusionImages([cls(x) for x in tensors])
    
     def getAsPIL(self):
         x = self._raw

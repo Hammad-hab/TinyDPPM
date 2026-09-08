@@ -4,7 +4,7 @@ import torch
 from torch.nn.modules.loss import MSELoss
 from torchvision import transforms
 from Datasets import Flowers102
-from transforms import PetalSelection
+from transforms import ImageWarp, PetalSelection
 from VersionManager import VersionManager
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
@@ -73,6 +73,7 @@ if __name__ == "__main__":
     loss_criterion = MSELoss(reduction="sum")
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
     selector = PetalSelection(thres=0.25, out_bright_mul=1.5)
+    warpimg = ImageWarp(strength=1.0)
     
     vm = VersionManager(model, "tiny-drgbae", dir="versions/tiny-drgbae/")
     writer = SummaryWriter("runs/tiny-drgbae")
@@ -86,8 +87,10 @@ if __name__ == "__main__":
             vm.setEpoch(epoch)
             for mbgd_step, (x, _) in enumerate(cf.train_loader):
                 x0 = selector(x)
+                x0 = warpimg(x0)
+                
                 delta_rgb = model(x0)
-                reconstructed = x0 + delta_rgb
+                reconstructed = torch.clamp(x0 + delta_rgb, 0, 1)
                 loss = loss_criterion(reconstructed, x)
 
                 optimizer.zero_grad()
@@ -109,7 +112,7 @@ if __name__ == "__main__":
             # Epoch averages
             avg_loss = np.mean(epoch_losses)
 
-            print("epoch average:", avg_loss)
+            print("Epoch average:", avg_loss)
 
             # Epoch-level TensorBoard data
             writer.add_scalar("Loss/loss-drgb", avg_loss, epoch)
