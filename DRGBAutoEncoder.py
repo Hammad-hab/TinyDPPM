@@ -39,29 +39,33 @@ class DRGBAutoEncoder(nn.Module):
         )
         
         self.l6 = nn.Sequential(
-            nn.ConvTranspose2d(64, 32, 3, padding=1, stride=2, output_padding=1), # 32 → 64
+            # Skip features, x5+x3, dimensions add
+            nn.ConvTranspose2d(64+64, 32, 3, padding=1, stride=2, output_padding=1), # 32 → 64
             nn.SiLU()
         )
         
         self.l7 = nn.Sequential(
-            nn.ConvTranspose2d(32, 16, 3, padding=1, stride=2, output_padding=1), # 64 → 128
+            # Skip features, x6+x2, dimensions add
+            nn.ConvTranspose2d(32+32, 16, 3, padding=1, stride=2, output_padding=1), # 64 → 128
             nn.SiLU()
         )
         
         self.l8 = nn.ConvTranspose2d(
-            16, 3, 3, padding=1, stride=2, output_padding=1  # 128 → 256
+            # Skip features, x7+x1, dimensions add
+            16+16, 3, 3, padding=1, stride=2, output_padding=1  # 128 → 256
         )
     def forward(self, x):
         x1 = self.l1(x) # 128x128 16ch
         x2 = self.l2(x1) # 64x64 32ch
         x3 = self.l3(x2) # 32x32 64ch
         
-        x4 = self.l4(x3) # 32x32
-        x5 = self.l5(x4) # 32x32
+        x4 = self.l4(x3) # 32x32 64 ch
+        x5 = self.l5(x4) # 32x32 64 ch
         
-        x6 = self.l6(x5) # 64x64
-        x7 = self.l7(x6) # 128x128
-        x8 = self.l8(x7) # 256x256
+        x6 = self.l6(torch.cat([x5, x3], dim=1)) # 64x64 32 ch
+        x7 = self.l7(torch.cat([x6, x2], dim=1)) # 128x128 16 ch 
+        x8 = self.l8(torch.cat([x7, x1], dim=1)) # 256x256 3ch
+        # Note: torch.cat adds the channels. so....
         return F.tanh(x8)
         
 if __name__ == "__main__":

@@ -1,3 +1,5 @@
+# Note: This component is no longer used anywhere in the codebase.
+
 from torch import nn
 import torch.nn.functional as F
 import torch
