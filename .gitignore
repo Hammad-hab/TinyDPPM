@@ -13,4 +13,3 @@ runs/*
 runs/
 beta_pipe
 *.png
-DRGBGen.py

@@ -71,7 +71,7 @@ if __name__ == "__main__":
     model = DRGBAutoEncoder()
 
     loss_criterion = MSELoss(reduction="sum")
-    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=3e-3)
     selector = PetalSelection(thres=0.25, out_bright_mul=1.5)
     warpimg = ImageWarp(strength=1.0)
     
