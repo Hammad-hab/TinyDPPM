@@ -1,1 +1,1 @@
-python3 -m venv ~/.tensorboard && source ~/.tensorboard/bin/activate && pip install tensorboard
+python3 -m venv ./.tensorboard && source ./.tensorboard/bin/activate && pip install tensorboard

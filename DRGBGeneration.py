@@ -18,7 +18,7 @@ vm.load_latest(True, True)
 
 model.eval()
 
-image = Image.open("generation-0.png").convert("RGB")
+image = Image.open("generation-1.png").convert("RGB")
 
 to_tensor = transforms.ToTensor()
 image_tensor = to_tensor(image)

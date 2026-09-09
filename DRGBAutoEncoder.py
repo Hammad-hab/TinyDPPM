@@ -52,15 +52,17 @@ class DRGBAutoEncoder(nn.Module):
             16, 3, 3, padding=1, stride=2, output_padding=1  # 128 → 256
         )
     def forward(self, x):
-        x = self.l1(x)
-        x = self.l2(x)
-        x = self.l3(x)
-        x = self.l4(x)
-        x = self.l5(x)
-        x = self.l6(x)
-        x = self.l7(x)
-        x = self.l8(x)
-        return F.tanh(x)
+        x1 = self.l1(x) # 128x128 16ch
+        x2 = self.l2(x1) # 64x64 32ch
+        x3 = self.l3(x2) # 32x32 64ch
+        
+        x4 = self.l4(x3) # 32x32
+        x5 = self.l5(x4) # 32x32
+        
+        x6 = self.l6(x5) # 64x64
+        x7 = self.l7(x6) # 128x128
+        x8 = self.l8(x7) # 256x256
+        return F.tanh(x8)
         
 if __name__ == "__main__":
     transform = transforms.Compose([
@@ -71,7 +73,7 @@ if __name__ == "__main__":
     model = DRGBAutoEncoder()
 
     loss_criterion = MSELoss(reduction="sum")
-    optimizer = torch.optim.AdamW(model.parameters(), lr=3e-3)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=1e-4)
     selector = PetalSelection(thres=0.25, out_bright_mul=1.5)
     warpimg = ImageWarp(strength=1.0)
     
