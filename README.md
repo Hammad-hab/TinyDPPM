@@ -2,6 +2,12 @@
 
 A from-scratch implementation of a **Denoising Diffusion Probabilistic Model (DDPM)** in PyTorch, trained on the [Flowers102](https://www.robots.ox.ac.uk/~vgg/data/flowers/102/) dataset at 256x256 resolution. The repo also includes standalone VAE and RGB-delta autoencoder experiments used for latent-space and image-space compression research.
 
+<p align="center">
+  <img width="256" height="256" alt="generation" src="https://github.com/user-attachments/assets/72644390-38ed-48e0-96a6-c8fc42a86ea3"/>
+  <img width="256" height="256" alt="generation-1" src="https://github.com/user-attachments/assets/e28e2b03-211f-4fba-b93c-ce69b276c877"/>
+  <img width="256" height="256" alt="generation-0" src="https://github.com/user-attachments/assets/9db0eab9-b6fb-4ed1-a971-b80f1d11f11f"/>
+</p>
+
 ![Forward diffusion example](assets/output.png)
 
 ## What's in here
