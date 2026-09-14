@@ -23,7 +23,7 @@ fd.to(device)
 ds = Flowers102(transform, batch_size=32)
 model = UNET()
 model.to(device)
-vm = VersionManager(model, 'tiny-dppm')
+vm = VersionManager(model, 'tiny-dppm-resnet')
 procs = TrainProcess(ns, fd, model, ds, vm, EPOCHS)
 vm._optim = procs.optim
 vm.load_latest(True, True)
