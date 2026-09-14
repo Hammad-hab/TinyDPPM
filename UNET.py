@@ -2,6 +2,22 @@ import torch.nn.functional as F
 from torch import nn
 import torch
 
+
+class ResNetBlock(nn.Module):
+    def __init__(self, in_channels, out_channels, ksize, stride, padding, time_emb_d) -> None:
+        self.c1 = nn.Conv2d(in_channels, out_channels, ksize, stride=stride, padding=padding)
+        self.c2 = nn.Conv2d(out_channels, out_channels, ksize, stride=1, padding=padding)
+
+        self.time_injector = nn.Linear(time_emb_d, out_channels)
+        self.skip = nn.Conv2d(in_channels, out_channels, 1, stride=stride, padding=0) # here, we use ksize=1 because we want it to analsye pixels individually
+
+    def forward(self, x0, t):
+        x = F.silu(self.c1(x0))
+        x = x + self.time_injector(t)[:, :, None, None]
+        x = F.silu(self.c2(x))
+        return x + self.skip(x0)
+
+    
 class UNET(nn.Module):
     def _encoder_block(self, in_channels, out_channels):
         return nn.Sequential(
@@ -32,8 +48,8 @@ class UNET(nn.Module):
             nn.Linear(d_hidden, d)
         )
 
-    def ProjectionLayer(self, temb, Cblock):
-        return nn.Linear(temb.shape[1], Cblock)
+    def ProjectionLayer(self, time_emb, Cblock):
+        return nn.Linear(time_emb.shape[1], Cblock)
     
     def _decoder_block(self, in_channels, out_channels):
             return nn.Sequential(
@@ -52,7 +68,8 @@ class UNET(nn.Module):
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.D = 128
+        self.D = 128 # dimension of time_emb vector, hyperparameter.
+        
         self.cblocks = [
             32,    # enc1
             64,    # enc2
@@ -96,9 +113,9 @@ class UNET(nn.Module):
         )
         
     def forward(self, x, t):
-        temb = self.mlp(self.sinusoidal_embedding(t, self.D))
+        time_emb = self.mlp(self.sinusoidal_embedding(t, self.D))
         # x is [16, 32, 32], standard CIFAR resolution
-        layers = [proj(temb)[:, :, None, None] for proj in self.proj_layers]
+        layers = [proj(time_emb)[:, :, None, None] for proj in self.proj_layers]
             
         x1 = self.enc1(x) # [32, 16, 16]
         x1 = x1 + layers[0]
