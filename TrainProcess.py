@@ -54,8 +54,6 @@ class TrainProcess:
         for x_batch, _ in loader:
             x0 = x_batch.to(torch.float32).to(self.device)
             t = torch.randint(0, self.ns.T, (x0.shape[0],)).to(self.device)
-            # with torch.no_grad():
-            #     mu, _ = self.vae.encoder(x0)
             x_t, eps = self.fd.getNoisyTensor(x0, t)
             mbgd_loss = step_fn(x_t, eps, t)
             if not DISABLE_LOGS:

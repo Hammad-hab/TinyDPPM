@@ -59,7 +59,7 @@ class UNET(nn.Module):
     
         return torch.cat(
             [torch.sin(freqs), torch.cos(freqs)],
-            dim=-1
+            dim=-1,
         ).to(device=t.device)
 
     def mlp_stack(self, d, d_hidden):
@@ -107,9 +107,13 @@ class UNET(nn.Module):
             64,    # dec5
             32,    # dec6
         ]
+        
         self.proj_layers = nn.ModuleList([nn.Linear(self.D, c) for c in self.cblocks])
+        # We cannot directly add time_embeddings and the output of decoder layers. So, we'll use Linear 
+        # layers to reshape them into the right dimensions. Each element of the list "cblocks" corresponds
+        # to the shape the layer needs.
 
-        self.enc1 = ResNetEncoderBlock(3, 32, self.D) # Out:128
+        self.enc1 = self._encoder_block(3, 32) # Out:128
         self.enc2 = ResNetEncoderBlock(32, 64, self.D) # Out:64
         self.enc3 = ResNetEncoderBlock(64, 128, self.D) # Out: 32
         self.enc4 = ResNetEncoderBlock(128, 256, self.D) # Out: 16
@@ -138,7 +142,7 @@ class UNET(nn.Module):
         # x is [16, 32, 32], standard CIFAR resolution
         layers = [proj(time_emb)[:, :, None, None] for proj in self.proj_layers]
             
-        x1 = self.enc1(x, time_emb) # [32, 16, 16]
+        x1 = self.enc1(x) # [32, 16, 16]
         x1 = x1 + layers[0]
         
         x2 = self.enc2(x1, time_emb)  # [64, 8, 8]
@@ -191,7 +195,7 @@ class UNET(nn.Module):
         x16 = self.dec6(x15, time_emb) # [64, 16, 16]
         x16 = x16 + layers[13]
         
-        out = self.dec7(x16, time_emb)
+        out = self.dec7(x16)
         return out
 
 if __name__ == "__main__":
