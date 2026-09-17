@@ -3,13 +3,19 @@ from functools import partial
 from torch import nn
 import torch
 
+def safe_groups(channels, target=32):
+    for g in (target, 16, 8, 4, 2, 1):
+        if channels % g == 0:
+            return g
+    return 1
+    
 class ResNetEncoderBlock(nn.Module):
     def __init__(self, in_channels, out_channels, time_emb_d, stride=2) -> None:
         super().__init__()
         self.c1 = nn.Conv2d(in_channels, out_channels, 3, stride=stride, padding=1)
         self.c2 = nn.Conv2d(out_channels, out_channels, 3, stride=1, padding=1)
-        self.gn1 = nn.GroupNorm(32, out_channels)
-        self.gn2 = nn.GroupNorm(64, out_channels)
+        self.gn1 = nn.GroupNorm(safe_groups(out_channels), out_channels)
+        self.gn2 = nn.GroupNorm(safe_groups(out_channels), out_channels)
         self.shouldSkip = in_channels != out_channels
         self.time_injector = nn.Linear(time_emb_d, out_channels)
         self.skip = nn.Conv2d(in_channels, out_channels, 1, stride=stride, padding=0) # here, we use ksize=1 because we want it to analsye pixels individually
@@ -26,8 +32,8 @@ class ResNetDecoderBlock(nn.Module):
         op = 1 if stride > 1 else 0
         self.ct1 = nn.ConvTranspose2d(in_channels, out_channels, 3, stride=stride, padding=1, output_padding=op)
         self.ct2 = nn.ConvTranspose2d(out_channels, out_channels, 3, stride=1, padding=1, output_padding=0)
-        self.gn1 = nn.GroupNorm(32, out_channels)
-        self.gn2 = nn.GroupNorm(64, out_channels)
+        self.gn1 = nn.GroupNorm(safe_groups(out_channels), out_channels)
+        self.gn2 = nn.GroupNorm(safe_groups(out_channels), out_channels)
         self.shouldSkip = in_channels != out_channels
         self.time_injector = nn.Linear(time_emb_d, out_channels)
         self.skip = nn.ConvTranspose2d(in_channels, out_channels, 1, stride=stride, padding=0, output_padding=op)
@@ -132,7 +138,7 @@ class UNET(nn.Module):
         self.dec3 = ResNetDecoderBlock(384, 128, self.D)
         self.dec4 = ResNetDecoderBlock(256, 128, self.D)
         self.dec5 = ResNetDecoderBlock(192, 64, self.D)
-        self.dec6 = self._decoder_block(96, 32)
+        self.dec6 = ResNetDecoderBlock(96, 32, self.D)
         
         self.dec7 = nn.Sequential(
             nn.Conv2d(32, 3, 3, padding=1),
