@@ -23,20 +23,21 @@ class ResNetEncoderBlock(nn.Module):
 class ResNetDecoderBlock(nn.Module):
     def __init__(self, in_channels, out_channels, time_emb_d, stride=2) -> None:
         super().__init__()
-        self.ct1 = nn.ConvTranspose2d(in_channels, out_channels, 3, stride=stride, padding=1, output_padding=1)
-        self.ct2 = nn.ConvTranspose2d(out_channels, out_channels, 3, stride=1, padding=1, output_padding=1)
+        op = 1 if stride > 1 else 0
+        self.ct1 = nn.ConvTranspose2d(in_channels, out_channels, 3, stride=stride, padding=1, output_padding=op)
+        self.ct2 = nn.ConvTranspose2d(out_channels, out_channels, 3, stride=1, padding=1, output_padding=0)
         self.gn1 = nn.GroupNorm(32, out_channels)
         self.gn2 = nn.GroupNorm(64, out_channels)
         self.shouldSkip = in_channels != out_channels
         self.time_injector = nn.Linear(time_emb_d, out_channels)
-        self.skip = nn.ConvTranspose2d(in_channels, out_channels, 1, stride=stride, padding=1, output_padding=1) # here, we use ksize=1 because we want it to analsye pixels individually
+        self.skip = nn.ConvTranspose2d(in_channels, out_channels, 1, stride=stride, padding=0, output_padding=op)
 
     def forward(self, x0, t):
         x = F.silu(self.gn1(self.ct1(x0)))
         x = x + self.time_injector(t)[:, :, None, None]
         x = F.silu(self.gn2(self.ct2(x)))
         return (x + self.skip(x0) if self.shouldSkip else x)
-
+        
 ResNetBottleneck = partial(ResNetEncoderBlock, stride=1)
 
 class UNET(nn.Module):
