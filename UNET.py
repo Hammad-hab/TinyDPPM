@@ -29,7 +29,7 @@ class ResNetDecoderBlock(nn.Module):
         self.gn2 = nn.GroupNorm(64, out_channels)
         self.shouldSkip = in_channels != out_channels
         self.time_injector = nn.Linear(time_emb_d, out_channels)
-        self.skip = nn.ConvTranspose2d(in_channels, out_channels, 1, stride=stride, padding=0) # here, we use ksize=1 because we want it to analsye pixels individually
+        self.skip = nn.ConvTranspose2d(in_channels, out_channels, 1, stride=stride, padding=1, output_padding=1) # here, we use ksize=1 because we want it to analsye pixels individually
 
     def forward(self, x0, t):
         x = F.silu(self.gn1(self.ct1(x0)))
