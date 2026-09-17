@@ -12,4 +12,9 @@ xncc.
 runs/*
 runs/
 beta_pipe
+bin/
+pyvenv.cfg
+share/
+lib/
+include/
 *.png
