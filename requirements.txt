@@ -1,11 +1,22 @@
+absl-py==2.3.1
+grpcio==1.80.0
+importlib_metadata==8.7.1
+Markdown==3.9
+MarkupSafe==3.0.3
 numpy==2.0.2
+packaging==26.3
+pillow==11.3.0
+protobuf==6.33.6
+tensorboard==2.21.0
+tensorboard-data-server==0.7.2
+typing_extensions==4.16.0
+Werkzeug==3.1.8
+zipp==3.23.1
 
 torch==2.8.0
 torchvision==0.23.0
 torchmetrics==1.8.2
 torchvision-extra-decoders==0.0.0.dev0
-
-pillow==11.3.0
 
 matplotlib==3.9.4
 matplotlib-inline==0.2.1
