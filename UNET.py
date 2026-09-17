@@ -131,7 +131,7 @@ class UNET(nn.Module):
         self.dec3 = ResNetDecoderBlock(384, 128, self.D)
         self.dec4 = ResNetDecoderBlock(256, 128, self.D)
         self.dec5 = ResNetDecoderBlock(192, 64, self.D)
-        self.dec6 = ResNetDecoderBlock(96, 32, self.D)
+        self.dec6 = self._decoder_block(96, 32)
         
         self.dec7 = nn.Sequential(
             nn.Conv2d(32, 3, 3, padding=1),
